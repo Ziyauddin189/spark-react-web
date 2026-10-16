@@ -1,37 +1,89 @@
 @import "tailwindcss";
 
+/*
+  Spark's own dark theme (navy, ember, gold, azure; Fraunces + Plus Jakarta Sans)
+  applied to the editorial layout inspired by academyux.com.
+  Token names are semantic: "paper" = page background, "ink" = main text.
+*/
 @theme {
   --font-display: "Fraunces", ui-serif, Georgia, serif;
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --color-navy: oklch(0.16 0.08 265);
-  --color-cream: oklch(0.985 0.012 85);
-  --color-ember: oklch(0.72 0.17 55);
-  --color-gold: oklch(0.78 0.14 80);
-  --color-azure: oklch(0.65 0.15 240);
-  --color-ink: oklch(0.20 0.07 265);
-  --color-ink-deep: oklch(0.16 0.08 265);
-  --color-muted-foreground: oklch(0.85 0.02 265);
-  --shadow-elegant: 0 10px 40px -10px oklch(0 0 0 / 0.5);
-  --shadow-glow: 0 0 40px -10px oklch(0.72 0.17 55 / 0.3);
-}
 
-:root {
-  --background: oklch(0.16 0.08 265);
-  --foreground: oklch(0.985 0.012 85);
-  --card: oklch(0.20 0.07 265);
-  --accent: oklch(0.72 0.17 55);
-  --ring: oklch(0.72 0.17 55);
-  --border: oklch(1 1 1 / 10%);
+  /* Surfaces — stepped navy so sections and cards separate */
+  --color-paper: oklch(0.15 0.06 265);
+  --color-surface: oklch(0.18 0.06 265);
+  --color-card: oklch(0.21 0.06 265);
+  --color-raised: oklch(0.26 0.06 265);
+  --color-deep: oklch(0.11 0.05 265);
+
+  /* Text */
+  --color-ink: oklch(0.98 0.01 85);
+  --color-ink-soft: oklch(0.74 0.03 265);
+  --color-line: oklch(1 0 0 / 11%);
+
+  /* Brand (from the logo) */
+  --color-peach: oklch(0.72 0.17 55); /* primary action = ember */
+  --color-peach-strong: oklch(0.77 0.16 60);
+  --color-on-accent: oklch(0.15 0.06 265); /* navy text on ember */
+  --color-ember: oklch(0.72 0.17 55);
+  --color-ember-deep: oklch(0.8 0.14 62); /* readable orange text on navy */
+  --color-gold: oklch(0.8 0.14 80);
+  --color-azure: oklch(0.65 0.15 240);
+
+  /* Semantic aliases used by the shared UI components */
+  --color-background: var(--color-paper);
+  --color-foreground: var(--color-ink);
+  --color-muted-foreground: var(--color-ink-soft);
+  --color-border: var(--color-line);
+  --color-accent: var(--color-ember);
+  --color-accent-foreground: var(--color-on-accent);
+  --color-ring: var(--color-ember);
+  --color-destructive: oklch(0.63 0.22 25);
+
   --radius: 0.75rem;
+  --shadow-glow: 0 0 40px -10px oklch(0.72 0.17 55 / 0.45);
 }
 
 @layer base {
   * {
-    border-color: var(--border);
-    outline-color: var(--ring);
+    border-color: var(--color-line);
+    outline-color: var(--color-ring);
+  }
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 6rem; /* keep anchored sections clear of the floating nav */
+    -webkit-text-size-adjust: 100%;
+    overflow-x: clip;
   }
   body {
-    background-color: var(--background);
-    color: var(--foreground);
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  h1, h2, h3, blockquote {
+    font-family: var(--font-display);
+  }
+  ::selection {
+    background: oklch(0.72 0.17 55 / 0.35);
+    color: var(--color-ink);
+  }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

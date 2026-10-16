@@ -1,110 +1,159 @@
+import { useEffect, useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Calendar, Mail, MapPin, Phone } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Mail, MapPin, Phone } from "lucide-react";
+import { ArrowButton, ArrowLink } from "@/components/ui/arrow-link";
+import Reveal from "@/components/landing/Reveal";
+import SplitText from "@/components/landing/SplitText";
+import { batches } from "@/data/batches";
+import { SELECT_BATCH_EVENT, mapsLink, site, whatsappLink } from "@/lib/site";
 
+const fieldClass =
+  "w-full rounded-lg border border-line bg-paper px-4 py-3 text-base text-ink placeholder:text-ink-soft/70 transition focus:border-ink focus:outline-none focus:ring-2 focus:ring-ember/30";
+const labelClass = "mb-2 block text-[11px] font-medium uppercase tracking-[0.12em] text-ink-soft";
+
+// "Say hi" finale (from the reference site) + the WhatsApp enquiry form and map.
 export default function ContactScreen() {
+  const [batch, setBatch] = useState("");
+
+  // Batch cards preselect the batch here.
+  useEffect(() => {
+    const onSelect = (e: Event) => setBatch((e as CustomEvent<string>).detail);
+    window.addEventListener(SELECT_BATCH_EVENT, onSelect);
+    return () => window.removeEventListener(SELECT_BATCH_EVENT, onSelect);
+  }, []);
+
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const data = new FormData(e.currentTarget);
+    const lines = [
+      "Hi Spark Academy, I'd like to enquire about a batch.",
+      `Name: ${data.get("name")}`,
+      `Class: ${data.get("grade")}`,
+      `Phone: ${data.get("phone")}`,
+      `Batch: ${batch || "Not sure yet"}`,
+    ];
+    const message = String(data.get("message") ?? "").trim();
+    if (message) lines.push(`Message: ${message}`);
+    window.open(whatsappLink(lines.join("\n")), "_blank", "noopener,noreferrer");
+  }
+
   return (
-    <>
-      <section id="contact" className="relative py-28 md:py-40">
-        <div className="mx-auto max-w-6xl px-6 md:px-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.8 }}
-            className="relative overflow-hidden rounded-[2.5rem] border border-ink-deep/10 bg-gradient-to-br from-ink-deep via-ink to-ink-deep p-10 text-cream shadow-[var(--shadow-elegant)] md:p-16"
-          >
-            <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-ember/30 blur-3xl" />
-            <div className="pointer-events-none absolute -left-24 -bottom-24 h-96 w-96 rounded-full bg-azure/30 blur-3xl" />
+    <section id="contact" className="bg-paper px-4 pt-16 pb-16 md:px-8 md:pt-28 md:pb-24">
+      <div className="mx-auto max-w-[1400px]">
+        {/* Say hi */}
+        <div className="text-center">
+          <h2 className="pb-[0.1em] text-[clamp(5rem,24vw,17rem)] font-medium leading-[0.9] tracking-[-0.025em] text-ink">
+            <SplitText text="Say hi" by="char" stagger={0.07} />
+            <motion.span
+              aria-hidden="true"
+              className="inline-block text-ember"
+              initial={{ scale: 0 }}
+              whileInView={{ scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ type: "spring", stiffness: 400, damping: 10, delay: 0.55 }}
+            >
+              .
+            </motion.span>
+          </h2>
+          <Reveal>
+            <p className="mx-auto mt-6 max-w-md text-lg leading-relaxed text-ink-soft">
+              We're always up for a chat. Send a message and we'll get back to you
+              with batch timings and fees.
+            </p>
+            <div className="mx-auto mt-8 flex max-w-xl flex-col justify-center gap-3 sm:flex-row">
+              <ArrowLink href={whatsappLink()} target="_blank" rel="noopener noreferrer" className="sm:min-w-52">
+                WhatsApp us
+              </ArrowLink>
+              <ArrowLink href={site.phoneHref} variant="light" className="sm:min-w-52">
+                Call {site.phoneDisplay}
+              </ArrowLink>
+            </div>
+          </Reveal>
+        </div>
 
-            <div className="relative grid grid-cols-1 gap-12 md:grid-cols-2">
+        {/* Form + map */}
+        <div className="mt-16 grid grid-cols-1 gap-3 md:mt-24 md:gap-4 lg:grid-cols-12">
+          <Reveal className="lg:col-span-7">
+            <form onSubmit={handleSubmit} className="grid h-full grid-cols-1 gap-5 rounded-2xl bg-surface p-5 sm:grid-cols-2 sm:p-8">
+              <div className="sm:col-span-2">
+                <h3 className="text-2xl font-medium tracking-[-0.03em] text-ink md:text-3xl">Enquire about a batch</h3>
+                <p className="mt-1 text-[15px] text-ink-soft">Opens WhatsApp with your details filled in — just tap Send.</p>
+              </div>
               <div>
-                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-ember">
-                  <Calendar className="h-3.5 w-3.5" /> Sundays · Live
-                </div>
-                <h2 className="mt-4 font-display text-4xl font-semibold leading-tight md:text-5xl">
-                  Ready to spark something bigger?
-                </h2>
-                <p className="mt-4 max-w-md text-white/75">
-                  Join a batch, meet the mentors, and experience learning that
-                  actually moves you forward.
-                </p>
-                <div className="mt-8 flex flex-wrap gap-3">
-                  <a href="mailto:ziyauddinshaik7@gmail.com">
-                    <Button size="lg" className="rounded-full bg-ember px-7 text-ink-deep hover:bg-ember/80">
-                      Enroll now <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </a>
-                  <a href="#batches">
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="rounded-full border-white/25 bg-transparent px-7 text-white hover:bg-white hover:text-ink-deep"
-                    >
-                      View batches
-                    </Button>
-                  </a>
-                </div>
+                <label htmlFor="enq-name" className={labelClass}>Student name</label>
+                <input id="enq-name" name="name" required autoComplete="name" placeholder="Full name" className={fieldClass} />
               </div>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {[
-                  { icon: Mail, k: "Email", v: "ziyauddinshaik7@gmail.com", href: "mailto:ziyauddinshaik7@gmail.com" },
-                  { icon: Phone, k: "Call", v: "+91 7337006907", href: "tel:7337006907" },
-                  { icon: MapPin, k: "Base", v: "Andhra Pradesh, India" },
-                  { icon: Calendar, k: "Live class", v: "Every Sunday" },
-                ].map((c) => {
-                  const Icon = c.icon;
-                  const CardContent = (
-                    <>
-                      <Icon className="h-5 w-5 text-ember" />
-                      <div className="mt-3 text-[11px] uppercase tracking-[0.18em] text-white/60">{c.k}</div>
-                      <div className="mt-1 font-medium break-all text-white">{c.v}</div>
-                    </>
-                  );
-
-                  return c.href ? (
-                    <a
-                      key={c.k}
-                      href={c.href}
-                      className="block rounded-2xl border border-white/10 bg-white/5 p-5 transition hover:-translate-y-1 hover:border-white/20 hover:bg-white/10"
-                    >
-                      {CardContent}
-                    </a>
-                  ) : (
-                    <div key={c.k} className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                      {CardContent}
-                    </div>
-                  );
-                })}
+              <div>
+                <label htmlFor="enq-grade" className={labelClass}>Class</label>
+                <input id="enq-grade" name="grade" required placeholder="e.g. 10th, Jr. Inter" className={fieldClass} />
               </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+              <div>
+                <label htmlFor="enq-phone" className={labelClass}>Phone</label>
+                <input
+                  id="enq-phone"
+                  name="phone"
+                  type="tel"
+                  required
+                  autoComplete="tel"
+                  pattern="[0-9+\s]{10,14}"
+                  title="Enter a 10-digit mobile number"
+                  placeholder="10-digit mobile"
+                  className={fieldClass}
+                />
+              </div>
+              <div>
+                <label htmlFor="enq-batch" className={labelClass}>Batch</label>
+                <select id="enq-batch" name="batch" value={batch} onChange={(e) => setBatch(e.target.value)} className={fieldClass}>
+                  <option value="">Not sure yet</option>
+                  {batches.map((b) => (
+                    <option key={b.title} value={b.title}>{b.title}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="sm:col-span-2">
+                <label htmlFor="enq-message" className={labelClass}>Message (optional)</label>
+                <textarea id="enq-message" name="message" rows={3} placeholder="Anything we should know?" className={fieldClass} />
+              </div>
+              <div className="sm:col-span-2">
+                <ArrowButton type="submit" className="w-full sm:w-auto sm:min-w-64">Send enquiry</ArrowButton>
+              </div>
+            </form>
+          </Reveal>
 
-      <footer className="border-t border-border bg-background">
-        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 px-6 py-10 md:flex-row md:items-center md:px-10">
-          <div className="flex items-center gap-3">
-            <img src="/Logo.png" alt="Spark Academy" className="h-11 w-11 object-contain" />
-            <div className="leading-tight">
-              <div className="font-display text-base font-semibold text-foreground">Spark Academy</div>
-              <div className="text-xs text-muted-foreground">© {new Date().getFullYear()} · Learn · Ignite · Launch</div>
+          <Reveal delay={0.08} className="lg:col-span-5">
+            <div className="flex h-full flex-col overflow-hidden rounded-2xl bg-surface">
+              <iframe
+                title={`Map of ${site.location}`}
+                src={`https://www.google.com/maps?q=${encodeURIComponent(site.mapQuery)}&z=16&output=embed`}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="h-64 w-full border-0 [filter:invert(0.92)_hue-rotate(180deg)_saturate(0.6)] lg:h-auto lg:min-h-64 lg:flex-1"
+              />
+              <ul className="divide-y divide-line px-5 sm:px-6">
+                <li>
+                  <a href={mapsLink()} target="_blank" rel="noopener noreferrer" className="flex min-h-14 items-center gap-3 py-3 text-ink hover:text-ember-deep">
+                    <MapPin className="h-5 w-5 flex-none" strokeWidth={1.5} />
+                    <span className="flex-1">{site.location}</span>
+                    <span className="text-[12px] uppercase tracking-[0.1em] text-ink-soft">Directions</span>
+                  </a>
+                </li>
+                <li>
+                  <a href={site.phoneHref} className="flex min-h-14 items-center gap-3 py-3 text-ink hover:text-ember-deep">
+                    <Phone className="h-5 w-5 flex-none" strokeWidth={1.5} />
+                    {site.phoneDisplay}
+                  </a>
+                </li>
+                <li>
+                  <a href={`mailto:${site.email}`} className="flex min-h-14 items-center gap-3 py-3 text-ink hover:text-ember-deep">
+                    <Mail className="h-5 w-5 flex-none" strokeWidth={1.5} />
+                    <span className="[overflow-wrap:anywhere]">{site.email}</span>
+                  </a>
+                </li>
+              </ul>
             </div>
-          </div>
-          <div className="flex items-center gap-3 text-foreground/70">
-              <a href="mailto:ziyauddinshaik7@gmail.com" className="rounded-full border border-border p-2 transition hover:text-ember hover:border-ember" aria-label="Email">
-                <Mail className="w-4 h-4" />
-              </a>
-              <a href="https://www.instagram.com/spark_academy_nlr?igsh=N2NnZWVkdXVrcWR5" target="_blank" rel="noopener noreferrer" className="rounded-full border border-border p-2 transition hover:text-ember hover:border-ember" aria-label="Instagram">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
-              </a>
-              <a href="tel:7337006907" className="rounded-full border border-border p-2 transition hover:text-ember hover:border-ember" aria-label="WhatsApp/Phone">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-              </a>
-          </div>
+          </Reveal>
         </div>
-      </footer>
-    </>
+      </div>
+    </section>
   );
 }
